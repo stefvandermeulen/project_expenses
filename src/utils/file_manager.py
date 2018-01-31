@@ -22,24 +22,27 @@ def str2float(string: str) -> float:
 
 def str2date(string: str) -> datetime.date:
 
-    return datetime.datetime.strptime(string, "%d-%m-%Y").date()
+    try:
+        return datetime.datetime.strptime(string, "%d-%m-%Y").date()
+    except ValueError as e:
+        return datetime.datetime.strptime(string, "%Y-%m-%d").date()
 
 
 def create_dir(path: str) -> bool:
 
-    if os.path.isdir(os.path.dirname(path)):
+    if os.path.isdir(path):
         print("{} already exists".format(path))
         return True
 
-    os.mkdir(os.path.dirname(path))
+    os.mkdir(path)
     return True
 
 
 def read_pandas(path: str, headers: list = None, sep: str= ",", **kwargs) -> pd.DataFrame:
 
-    headers = headers if headers is not None else []
+    names = headers
 
-    if not headers:
+    if headers is None:
         with open(path, "r") as f:
             headers = f.readline().split(sep)
 
@@ -51,7 +54,7 @@ def read_pandas(path: str, headers: list = None, sep: str= ",", **kwargs) -> pd.
     converters["Amount"] = str2float
     converters["Date"] = str2date
 
-    return pd.read_csv(path, names=headers, sep=sep, converters=converters, **kwargs)
+    return pd.read_csv(path, names=names, sep=sep, converters=converters, **kwargs)
 
 
 def write_pandas(df: pd.DataFrame, path: str) -> bool:
